@@ -12,6 +12,7 @@ Located at the top of the window, this panel allows you to:
 - **Connection Name**: Give your connection a friendly name (default: "Local Redis")
 - **Host**: Enter the Redis server hostname (default: "localhost")
 - **Port**: Specify the Redis port (default: 6379)
+- **DB**: Select the Redis database number (default: 0, range: 0-15)
 - **Password**: Enter password if Redis requires authentication (optional)
 - **Connect/Disconnect Buttons**: Control the connection state
 
@@ -66,6 +67,7 @@ Displays connection status and operation feedback:
 ### Connection Management
 - Simple connection to local or remote Redis servers
 - Password authentication support
+- Multiple database selection (0-15)
 - Connection state persistence during session
 - Clear visual feedback of connection status
 
@@ -124,7 +126,6 @@ Displays connection status and operation feedback:
 - Command console
 - Key renaming
 - Value editing
-- Database selector
 - Custom themes
 - Connection history
 

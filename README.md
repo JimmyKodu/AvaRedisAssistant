@@ -10,6 +10,7 @@ A desktop Redis GUI application for visual management and monitoring, built with
   - 支持连接到本地或远程 Redis 服务器
   - 支持密码认证
   - 支持 SSL 连接
+  - 支持选择不同的数据库（0-15）
 
 - 🔍 **键值浏览** / Key-Value Browsing
   - 查看所有 Redis 键
@@ -68,6 +69,7 @@ dotnet run
 1. **连接到 Redis 服务器** / Connect to Redis Server
    - 填写服务器主机名（默认：localhost）
    - 填写端口号（默认：6379）
+   - 选择数据库编号（默认：0，范围 0-15）
    - 如需要，填写密码
    - 点击"Connect"按钮
 
