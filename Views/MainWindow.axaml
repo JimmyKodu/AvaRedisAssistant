@@ -17,34 +17,39 @@
         <!-- Connection Panel -->
         <Border Grid.Row="0" BorderBrush="{DynamicResource SystemAccentColor}" 
                 BorderThickness="1" CornerRadius="5" Padding="10" Margin="0,0,0,10">
-            <Grid ColumnDefinitions="Auto,*,Auto,*,Auto,*,Auto,Auto" RowDefinitions="Auto,Auto">
+            <Grid ColumnDefinitions="Auto,*,Auto,*,Auto,*,Auto,*,Auto,Auto" RowDefinitions="Auto,Auto">
                 <TextBlock Grid.Row="0" Grid.Column="0" Text="Connection:" 
                           VerticalAlignment="Center" Margin="0,0,10,0" FontWeight="Bold"/>
                 <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding ConnectionName}" 
-                         Watermark="Connection Name" Margin="0,0,10,0" Width="150"/>
+                         Watermark="Connection Name" Margin="0,0,10,0" Width="120"/>
                 
                 <TextBlock Grid.Row="0" Grid.Column="2" Text="Host:" 
                           VerticalAlignment="Center" Margin="0,0,10,0"/>
                 <TextBox Grid.Row="0" Grid.Column="3" Text="{Binding Host}" 
-                         Watermark="localhost" Margin="0,0,10,0" Width="150"/>
+                         Watermark="localhost" Margin="0,0,10,0" Width="120"/>
                 
                 <TextBlock Grid.Row="0" Grid.Column="4" Text="Port:" 
                           VerticalAlignment="Center" Margin="0,0,10,0"/>
                 <TextBox Grid.Row="0" Grid.Column="5" Text="{Binding Port}" 
-                         Watermark="6379" Margin="0,0,10,0" Width="80"/>
+                         Watermark="6379" Margin="0,0,10,0" Width="60"/>
                 
-                <Button Grid.Row="0" Grid.Column="6" Content="Connect" 
+                <TextBlock Grid.Row="0" Grid.Column="6" Text="DB:" 
+                          VerticalAlignment="Center" Margin="0,0,10,0"/>
+                <TextBox Grid.Row="0" Grid.Column="7" Text="{Binding Database}" 
+                         Watermark="0" Margin="0,0,10,0" Width="40"/>
+                
+                <Button Grid.Row="0" Grid.Column="8" Content="Connect" 
                         Command="{Binding ConnectCommand}" 
                         IsEnabled="{Binding !IsConnected}"
                         Margin="0,0,5,0" Padding="15,5"/>
-                <Button Grid.Row="0" Grid.Column="7" Content="Disconnect" 
+                <Button Grid.Row="0" Grid.Column="9" Content="Disconnect" 
                         Command="{Binding DisconnectCommand}" 
                         IsEnabled="{Binding IsConnected}"
                         Padding="15,5"/>
                 
                 <TextBlock Grid.Row="1" Grid.Column="0" Text="Password:" 
                           VerticalAlignment="Center" Margin="0,5,10,0"/>
-                <TextBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="5" 
+                <TextBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="7" 
                          Text="{Binding Password}" 
                          PasswordChar="*" Watermark="Optional" Margin="0,5,10,0"/>
             </Grid>

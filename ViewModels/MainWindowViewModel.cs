@@ -26,6 +26,9 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     private string _password = string.Empty;
     
     [ObservableProperty]
+    private int _database = 0;
+    
+    [ObservableProperty]
     private bool _isConnected = false;
     
     [ObservableProperty]
@@ -67,7 +70,8 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
             Name = ConnectionName,
             Host = Host,
             Port = Port,
-            Password = string.IsNullOrEmpty(Password) ? null : Password
+            Password = string.IsNullOrEmpty(Password) ? null : Password,
+            Database = Database
         };
         
         var connected = await _redisService.ConnectAsync(connection);
