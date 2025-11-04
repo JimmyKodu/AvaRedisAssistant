@@ -47,22 +47,22 @@ public class RedisService : IDisposable
         _currentDatabase = 0;
     }
     
-    public async Task<bool> SwitchDatabaseAsync(int databaseNumber)
+    public Task<bool> SwitchDatabaseAsync(int databaseNumber)
     {
         try
         {
             if (_connection == null || !_connection.IsConnected)
-                return false;
+                return Task.FromResult(false);
             
             _database = _connection.GetDatabase(databaseNumber);
             _currentDatabase = databaseNumber;
             
-            return await Task.FromResult(true);
+            return Task.FromResult(true);
         }
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"Switch database error: {ex.Message}");
-            return false;
+            return Task.FromResult(false);
         }
     }
     

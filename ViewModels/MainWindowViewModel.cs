@@ -4,6 +4,7 @@ using AvaRedisAssistant.Services;
 using AvaRedisAssistant.Models;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System;
 
@@ -12,6 +13,7 @@ namespace AvaRedisAssistant.ViewModels;
 public partial class MainWindowViewModel : ViewModelBase, IDisposable
 {
     private readonly RedisService _redisService;
+    private readonly SemaphoreSlim _databaseSwitchLock = new SemaphoreSlim(1, 1);
     
     [ObservableProperty]
     private string _connectionName = "Local Redis";
@@ -225,8 +227,15 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     {
         if (IsConnected)
         {
-            Task.Run(async () =>
+            _ = Task.Run(async () =>
             {
+                // Use semaphore to prevent race conditions from multiple rapid database switches
+                if (!await _databaseSwitchLock.WaitAsync(0))
+                {
+                    // Another switch is in progress, skip this one
+                    return;
+                }
+                
                 try
                 {
                     await SwitchDatabaseAsync();
@@ -235,6 +244,10 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
                 {
                     System.Diagnostics.Debug.WriteLine($"Database switch error: {ex.Message}");
                 }
+                finally
+                {
+                    _databaseSwitchLock.Release();
+                }
             });
         }
     }
@@ -242,5 +255,6 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     public void Dispose()
     {
         _redisService?.Dispose();
+        _databaseSwitchLock?.Dispose();
     }
 }
