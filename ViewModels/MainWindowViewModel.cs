@@ -179,11 +179,7 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
             return;
         
         var databases = await _redisService.GetAvailableDatabasesAsync();
-        AvailableDatabases.Clear();
-        foreach (var db in databases)
-        {
-            AvailableDatabases.Add(db);
-        }
+        AvailableDatabases = new ObservableCollection<int>(databases);
     }
     
     partial void OnSelectedKeyChanged(RedisKeyInfo? value)

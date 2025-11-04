@@ -52,8 +52,12 @@ public class RedisService : IDisposable
         if (_connection == null || _database == null)
             return new List<RedisKeyInfo>();
         
+        var endpoints = _connection.GetEndPoints();
+        if (endpoints == null || endpoints.Length == 0)
+            return new List<RedisKeyInfo>();
+        
         var keys = new List<RedisKeyInfo>();
-        var server = _connection.GetServer(_connection.GetEndPoints().First());
+        var server = _connection.GetServer(endpoints[0]);
         
         await foreach (var key in server.KeysAsync(database: _currentDatabase, pattern: pattern, pageSize: maxKeys))
         {
@@ -126,7 +130,11 @@ public class RedisService : IDisposable
         
         try
         {
-            var server = _connection.GetServer(_connection.GetEndPoints().First());
+            var endpoints = _connection.GetEndPoints();
+            if (endpoints == null || endpoints.Length == 0)
+                return null;
+            
+            var server = _connection.GetServer(endpoints[0]);
             var info = await server.InfoAsync();
             
             var serverInfo = new RedisServerInfo();
@@ -181,7 +189,14 @@ public class RedisService : IDisposable
         
         try
         {
-            var server = _connection.GetServer(_connection.GetEndPoints().First());
+            var endpoints = _connection.GetEndPoints();
+            if (endpoints == null || endpoints.Length == 0)
+            {
+                // Return default list if no endpoints available
+                return Enumerable.Range(0, 16).ToList();
+            }
+            
+            var server = _connection.GetServer(endpoints[0]);
             var config = await server.ConfigGetAsync("databases");
             
             // Default to 16 databases if config is not available
