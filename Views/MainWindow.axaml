@@ -35,8 +35,10 @@
                 
                 <TextBlock Grid.Row="0" Grid.Column="6" Text="DB:" 
                           VerticalAlignment="Center" Margin="0,0,10,0"/>
-                <TextBox Grid.Row="0" Grid.Column="7" Text="{Binding Database}" 
-                         Watermark="0" Margin="0,0,10,0" Width="40"/>
+                <ComboBox Grid.Row="0" Grid.Column="7" 
+                         SelectedItem="{Binding Database}"
+                         ItemsSource="{Binding AvailableDatabases}"
+                         Margin="0,0,10,0" Width="60"/>
                 
                 <Button Grid.Row="0" Grid.Column="8" Content="Connect" 
                         Command="{Binding ConnectCommand}" 
