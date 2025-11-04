@@ -11,6 +11,7 @@ public class RedisService : IDisposable
 {
     private ConnectionMultiplexer? _connection;
     private IDatabase? _database;
+    private int _currentDatabase = 0;
     
     public bool IsConnected => _connection?.IsConnected ?? false;
     
@@ -26,6 +27,7 @@ public class RedisService : IDisposable
             
             _connection = await ConnectionMultiplexer.ConnectAsync(options);
             _database = _connection.GetDatabase(connection.Database);
+            _currentDatabase = connection.Database;
             
             return true;
         }
@@ -41,6 +43,7 @@ public class RedisService : IDisposable
         _connection?.Dispose();
         _connection = null;
         _database = null;
+        _currentDatabase = 0;
     }
     
     public async Task<List<RedisKeyInfo>> GetKeysAsync(string pattern = "*", int maxKeys = 1000)
@@ -51,7 +54,7 @@ public class RedisService : IDisposable
         var keys = new List<RedisKeyInfo>();
         var server = _connection.GetServer(_connection.GetEndPoints().First());
         
-        await foreach (var key in server.KeysAsync(pattern: pattern, pageSize: maxKeys))
+        await foreach (var key in server.KeysAsync(database: _currentDatabase, pattern: pattern, pageSize: maxKeys))
         {
             var keyInfo = new RedisKeyInfo
             {
@@ -159,7 +162,7 @@ public class RedisService : IDisposable
                 }
             }
             
-            serverInfo.TotalKeys = await server.DatabaseSizeAsync();
+            serverInfo.TotalKeys = await server.DatabaseSizeAsync(_currentDatabase);
             
             return serverInfo;
         }
