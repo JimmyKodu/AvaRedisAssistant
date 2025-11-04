@@ -182,6 +182,27 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
         AvailableDatabases = new ObservableCollection<int>(databases);
     }
     
+    [RelayCommand]
+    private async Task SwitchDatabaseAsync()
+    {
+        if (!IsConnected)
+            return;
+        
+        StatusMessage = $"Switching to database {Database}...";
+        
+        var success = await _redisService.SwitchDatabaseAsync(Database);
+        if (success)
+        {
+            StatusMessage = $"Switched to database {Database}";
+            await LoadKeysAsync();
+            await LoadServerInfoAsync();
+        }
+        else
+        {
+            StatusMessage = "Failed to switch database";
+        }
+    }
+    
     partial void OnSelectedKeyChanged(RedisKeyInfo? value)
     {
         if (value != null)
@@ -195,6 +216,24 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
                 catch
                 {
                     // Silently handle errors - user will see empty value
+                }
+            });
+        }
+    }
+    
+    partial void OnDatabaseChanged(int value)
+    {
+        if (IsConnected)
+        {
+            Task.Run(async () =>
+            {
+                try
+                {
+                    await SwitchDatabaseAsync();
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Database switch error: {ex.Message}");
                 }
             });
         }
