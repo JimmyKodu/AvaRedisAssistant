@@ -29,8 +29,9 @@ public class RedisService : IDisposable
             
             return true;
         }
-        catch
+        catch (Exception ex)
         {
+            System.Diagnostics.Debug.WriteLine($"Connection error: {ex.Message}");
             return false;
         }
     }
@@ -99,8 +100,9 @@ public class RedisService : IDisposable
             await _database.StringSetAsync(key, value);
             return true;
         }
-        catch
+        catch (Exception ex)
         {
+            System.Diagnostics.Debug.WriteLine($"Set value error: {ex.Message}");
             return false;
         }
     }
@@ -161,8 +163,9 @@ public class RedisService : IDisposable
             
             return serverInfo;
         }
-        catch
+        catch (Exception ex)
         {
+            System.Diagnostics.Debug.WriteLine($"Get server info error: {ex.Message}");
             return null;
         }
     }

@@ -5,10 +5,11 @@ using AvaRedisAssistant.Models;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using System;
 
 namespace AvaRedisAssistant.ViewModels;
 
-public partial class MainWindowViewModel : ViewModelBase
+public partial class MainWindowViewModel : ViewModelBase, IDisposable
 {
     private readonly RedisService _redisService;
     
@@ -167,7 +168,22 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         if (value != null)
         {
-            _ = LoadKeyValueAsync();
+            Task.Run(async () =>
+            {
+                try
+                {
+                    await LoadKeyValueAsync();
+                }
+                catch
+                {
+                    // Silently handle errors - user will see empty value
+                }
+            });
         }
+    }
+    
+    public void Dispose()
+    {
+        _redisService?.Dispose();
     }
 }

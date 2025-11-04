@@ -161,7 +161,7 @@
                 <!-- Add Key Panel -->
                 <Border Grid.Row="1" BorderBrush="{DynamicResource SystemAccentColor}" 
                         BorderThickness="1" CornerRadius="5" Padding="10" Margin="5,5,0,0">
-                    <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto">
+                    <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto">
                         <TextBlock Grid.Row="0" Text="Add New Key" 
                                   FontWeight="Bold" FontSize="16" Margin="0,0,0,10"/>
                         
@@ -170,12 +170,12 @@
                                 Watermark="Enter key name" Margin="0,0,0,10"/>
                         
                         <TextBlock Grid.Row="3" Text="Value:" Margin="0,0,0,5"/>
-                        <TextBox Text="{Binding NewValue}" 
+                        <TextBox Grid.Row="4" Text="{Binding NewValue}" 
                                 Watermark="Enter value" 
                                 AcceptsReturn="True" 
                                 Height="60" Margin="0,0,0,10"/>
                         
-                        <Button Grid.Row="4" Content="Add Key" 
+                        <Button Grid.Row="5" Content="Add Key" 
                                Command="{Binding AddKeyCommand}"
                                IsEnabled="{Binding IsConnected}"
                                HorizontalAlignment="Stretch"/>
