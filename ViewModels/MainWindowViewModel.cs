@@ -14,6 +14,7 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
 {
     private readonly RedisService _redisService;
     private readonly SemaphoreSlim _databaseSwitchLock = new SemaphoreSlim(1, 1);
+    private int _pendingDatabaseSwitch = -1;
     
     [ObservableProperty]
     private string _connectionName = "Local Redis";
@@ -227,18 +228,22 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     {
         if (IsConnected)
         {
+            // Store the requested database number
+            _pendingDatabaseSwitch = value;
+            
             _ = Task.Run(async () =>
             {
-                // Use semaphore to prevent race conditions from multiple rapid database switches
-                if (!await _databaseSwitchLock.WaitAsync(0))
-                {
-                    // Another switch is in progress, skip this one
-                    return;
-                }
+                // Wait for any ongoing database switch to complete
+                await _databaseSwitchLock.WaitAsync();
                 
                 try
                 {
-                    await SwitchDatabaseAsync();
+                    // Check if this is still the desired database (user may have changed again)
+                    if (_pendingDatabaseSwitch == value)
+                    {
+                        await SwitchDatabaseAsync();
+                        _pendingDatabaseSwitch = -1;
+                    }
                 }
                 catch (Exception ex)
                 {
