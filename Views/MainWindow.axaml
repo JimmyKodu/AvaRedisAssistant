@@ -1,0 +1,195 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:AvaRedisAssistant.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="700"
+        x:Class="AvaRedisAssistant.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="Redis Assistant - Desktop Management Tool">
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+    <Grid RowDefinitions="Auto,*,Auto" Margin="10">
+        <!-- Connection Panel -->
+        <Border Grid.Row="0" BorderBrush="{DynamicResource SystemAccentColor}" 
+                BorderThickness="1" CornerRadius="5" Padding="10" Margin="0,0,0,10">
+            <Grid ColumnDefinitions="Auto,*,Auto,*,Auto,*,Auto,Auto" RowDefinitions="Auto,Auto">
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="Connection:" 
+                          VerticalAlignment="Center" Margin="0,0,10,0" FontWeight="Bold"/>
+                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding ConnectionName}" 
+                         Watermark="Connection Name" Margin="0,0,10,0" Width="150"/>
+                
+                <TextBlock Grid.Row="0" Grid.Column="2" Text="Host:" 
+                          VerticalAlignment="Center" Margin="0,0,10,0"/>
+                <TextBox Grid.Row="0" Grid.Column="3" Text="{Binding Host}" 
+                         Watermark="localhost" Margin="0,0,10,0" Width="150"/>
+                
+                <TextBlock Grid.Row="0" Grid.Column="4" Text="Port:" 
+                          VerticalAlignment="Center" Margin="0,0,10,0"/>
+                <TextBox Grid.Row="0" Grid.Column="5" Text="{Binding Port}" 
+                         Watermark="6379" Margin="0,0,10,0" Width="80"/>
+                
+                <Button Grid.Row="0" Grid.Column="6" Content="Connect" 
+                        Command="{Binding ConnectCommand}" 
+                        IsEnabled="{Binding !IsConnected}"
+                        Margin="0,0,5,0" Padding="15,5"/>
+                <Button Grid.Row="0" Grid.Column="7" Content="Disconnect" 
+                        Command="{Binding DisconnectCommand}" 
+                        IsEnabled="{Binding IsConnected}"
+                        Padding="15,5"/>
+                
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="Password:" 
+                          VerticalAlignment="Center" Margin="0,5,10,0"/>
+                <TextBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="5" 
+                         Text="{Binding Password}" 
+                         PasswordChar="*" Watermark="Optional" Margin="0,5,10,0"/>
+            </Grid>
+        </Border>
+
+        <!-- Main Content -->
+        <Grid Grid.Row="1" ColumnDefinitions="300,*,350">
+            <!-- Keys List -->
+            <Border Grid.Column="0" BorderBrush="{DynamicResource SystemAccentColor}" 
+                    BorderThickness="1" CornerRadius="5" Padding="10" Margin="0,0,5,0">
+                <Grid RowDefinitions="Auto,Auto,*">
+                    <TextBlock Grid.Row="0" Text="Redis Keys" FontWeight="Bold" 
+                              FontSize="16" Margin="0,0,0,10"/>
+                    
+                    <Grid Grid.Row="1" ColumnDefinitions="*,Auto" Margin="0,0,0,10">
+                        <TextBox Grid.Column="0" Text="{Binding SearchPattern}" 
+                                Watermark="Search pattern (*)" Margin="0,0,5,0"/>
+                        <Button Grid.Column="1" Content="🔍" 
+                               Command="{Binding LoadKeysCommand}"
+                               IsEnabled="{Binding IsConnected}" Padding="10,5"/>
+                    </Grid>
+                    
+                    <ListBox Grid.Row="2" ItemsSource="{Binding Keys}" 
+                            SelectedItem="{Binding SelectedKey}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Key}" FontWeight="Bold"/>
+                                    <TextBlock Text="{Binding Type}" 
+                                             FontSize="10" Foreground="Gray"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+            </Border>
+
+            <!-- Key Value Viewer -->
+            <Border Grid.Column="1" BorderBrush="{DynamicResource SystemAccentColor}" 
+                    BorderThickness="1" CornerRadius="5" Padding="10" Margin="5,0,5,0">
+                <Grid RowDefinitions="Auto,*,Auto,Auto">
+                    <TextBlock Grid.Row="0" 
+                              Text="{Binding SelectedKey.Key, StringFormat='Key: {0}'}" 
+                              FontWeight="Bold" FontSize="16" Margin="0,0,0,10"/>
+                    
+                    <ScrollViewer Grid.Row="1">
+                        <TextBox Text="{Binding KeyValue}" 
+                                AcceptsReturn="True" 
+                                TextWrapping="Wrap"
+                                IsReadOnly="True"
+                                BorderThickness="0"/>
+                    </ScrollViewer>
+                    
+                    <Separator Grid.Row="2" Margin="0,10"/>
+                    
+                    <StackPanel Grid.Row="3" Orientation="Horizontal" 
+                               HorizontalAlignment="Right" Spacing="10">
+                        <Button Content="Delete Key" 
+                               Command="{Binding DeleteKeyCommand}"
+                               IsEnabled="{Binding SelectedKey, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Server Info and Add Key Panel -->
+            <Grid Grid.Column="2" RowDefinitions="*,Auto">
+                <!-- Server Info -->
+                <Border Grid.Row="0" BorderBrush="{DynamicResource SystemAccentColor}" 
+                        BorderThickness="1" CornerRadius="5" Padding="10" Margin="5,0,0,5">
+                    <Grid RowDefinitions="Auto,*,Auto">
+                        <TextBlock Grid.Row="0" Text="Server Info" 
+                                  FontWeight="Bold" FontSize="16" Margin="0,0,0,10"/>
+                        
+                        <ScrollViewer Grid.Row="1">
+                            <StackPanel Spacing="8" IsVisible="{Binding ServerInfo, Converter={x:Static ObjectConverters.IsNotNull}}">
+                                <StackPanel>
+                                    <TextBlock Text="Version" FontWeight="Bold" FontSize="12"/>
+                                    <TextBlock Text="{Binding ServerInfo.Version}"/>
+                                </StackPanel>
+                                <StackPanel>
+                                    <TextBlock Text="Operating System" FontWeight="Bold" FontSize="12"/>
+                                    <TextBlock Text="{Binding ServerInfo.OperatingSystem}"/>
+                                </StackPanel>
+                                <StackPanel>
+                                    <TextBlock Text="Used Memory" FontWeight="Bold" FontSize="12"/>
+                                    <TextBlock Text="{Binding ServerInfo.UsedMemory, StringFormat={}{0:N0} bytes}"/>
+                                </StackPanel>
+                                <StackPanel>
+                                    <TextBlock Text="Total Keys" FontWeight="Bold" FontSize="12"/>
+                                    <TextBlock Text="{Binding ServerInfo.TotalKeys}"/>
+                                </StackPanel>
+                                <StackPanel>
+                                    <TextBlock Text="Connected Clients" FontWeight="Bold" FontSize="12"/>
+                                    <TextBlock Text="{Binding ServerInfo.ConnectedClients}"/>
+                                </StackPanel>
+                                <StackPanel>
+                                    <TextBlock Text="Commands Processed" FontWeight="Bold" FontSize="12"/>
+                                    <TextBlock Text="{Binding ServerInfo.TotalCommandsProcessed, StringFormat={}{0:N0}}"/>
+                                </StackPanel>
+                                <StackPanel>
+                                    <TextBlock Text="Uptime (seconds)" FontWeight="Bold" FontSize="12"/>
+                                    <TextBlock Text="{Binding ServerInfo.Uptime, StringFormat={}{0:N0}}"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </ScrollViewer>
+                        
+                        <Button Grid.Row="2" Content="Refresh Info" 
+                               Command="{Binding LoadServerInfoCommand}"
+                               IsEnabled="{Binding IsConnected}"
+                               HorizontalAlignment="Stretch" Margin="0,10,0,0"/>
+                    </Grid>
+                </Border>
+
+                <!-- Add Key Panel -->
+                <Border Grid.Row="1" BorderBrush="{DynamicResource SystemAccentColor}" 
+                        BorderThickness="1" CornerRadius="5" Padding="10" Margin="5,5,0,0">
+                    <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto">
+                        <TextBlock Grid.Row="0" Text="Add New Key" 
+                                  FontWeight="Bold" FontSize="16" Margin="0,0,0,10"/>
+                        
+                        <TextBlock Grid.Row="1" Text="Key:" Margin="0,0,0,5"/>
+                        <TextBox Grid.Row="2" Text="{Binding NewKey}" 
+                                Watermark="Enter key name" Margin="0,0,0,10"/>
+                        
+                        <TextBlock Grid.Row="3" Text="Value:" Margin="0,0,0,5"/>
+                        <TextBox Text="{Binding NewValue}" 
+                                Watermark="Enter value" 
+                                AcceptsReturn="True" 
+                                Height="60" Margin="0,0,0,10"/>
+                        
+                        <Button Grid.Row="4" Content="Add Key" 
+                               Command="{Binding AddKeyCommand}"
+                               IsEnabled="{Binding IsConnected}"
+                               HorizontalAlignment="Stretch"/>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Grid>
+
+        <!-- Status Bar -->
+        <Border Grid.Row="2" Background="{DynamicResource SystemAccentColor}" 
+                CornerRadius="5" Padding="10,5" Margin="0,10,0,0">
+            <TextBlock Text="{Binding StatusMessage}" 
+                      Foreground="White" FontWeight="Bold"/>
+        </Border>
+    </Grid>
+
+</Window>
