@@ -29,6 +29,9 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     private int _database = 0;
     
     [ObservableProperty]
+    private ObservableCollection<int> _availableDatabases = new(Enumerable.Range(0, 16));
+    
+    [ObservableProperty]
     private bool _isConnected = false;
     
     [ObservableProperty]
@@ -65,13 +68,6 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     {
         StatusMessage = "Connecting...";
         
-        // Validate database number (Redis supports 0-15 by default)
-        if (Database < 0 || Database > 15)
-        {
-            StatusMessage = "Database number must be between 0 and 15";
-            return;
-        }
-        
         var connection = new RedisConnection
         {
             Name = ConnectionName,
@@ -87,6 +83,7 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
         
         if (connected)
         {
+            await LoadAvailableDatabasesAsync();
             await LoadKeysAsync();
             await LoadServerInfoAsync();
         }
@@ -173,6 +170,20 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
             return;
         
         ServerInfo = await _redisService.GetServerInfoAsync();
+    }
+    
+    [RelayCommand]
+    private async Task LoadAvailableDatabasesAsync()
+    {
+        if (!IsConnected)
+            return;
+        
+        var databases = await _redisService.GetAvailableDatabasesAsync();
+        AvailableDatabases.Clear();
+        foreach (var db in databases)
+        {
+            AvailableDatabases.Add(db);
+        }
     }
     
     partial void OnSelectedKeyChanged(RedisKeyInfo? value)

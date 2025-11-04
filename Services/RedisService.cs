@@ -24,6 +24,7 @@ public class RedisService : IDisposable
             var options = ConfigurationOptions.Parse(connection.ConnectionString);
             options.AbortOnConnectFail = false;
             options.ConnectTimeout = 5000;
+            options.AllowAdmin = true;  // Enable admin mode for INFO and CONFIG commands
             
             _connection = await ConnectionMultiplexer.ConnectAsync(options);
             _database = _connection.GetDatabase(connection.Database);
@@ -170,6 +171,39 @@ public class RedisService : IDisposable
         {
             System.Diagnostics.Debug.WriteLine($"Get server info error: {ex.Message}");
             return null;
+        }
+    }
+    
+    public async Task<List<int>> GetAvailableDatabasesAsync()
+    {
+        if (_connection == null)
+            return new List<int>();
+        
+        try
+        {
+            var server = _connection.GetServer(_connection.GetEndPoints().First());
+            var config = await server.ConfigGetAsync("databases");
+            
+            // Default to 16 databases if config is not available
+            int databaseCount = 16;
+            if (config.Length > 0 && int.TryParse(config[0].Value, out var count))
+            {
+                databaseCount = count;
+            }
+            
+            var databases = new List<int>();
+            for (int i = 0; i < databaseCount; i++)
+            {
+                databases.Add(i);
+            }
+            
+            return databases;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Get databases error: {ex.Message}");
+            // Return default list 0-15 if there's an error
+            return Enumerable.Range(0, 16).ToList();
         }
     }
     
