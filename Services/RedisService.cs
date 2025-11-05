@@ -47,6 +47,25 @@ public class RedisService : IDisposable
         _currentDatabase = 0;
     }
     
+    public Task<bool> SwitchDatabaseAsync(int databaseNumber)
+    {
+        try
+        {
+            if (_connection == null || !_connection.IsConnected)
+                return Task.FromResult(false);
+            
+            _database = _connection.GetDatabase(databaseNumber);
+            _currentDatabase = databaseNumber;
+            
+            return Task.FromResult(true);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Switch database error: {ex.Message}");
+            return Task.FromResult(false);
+        }
+    }
+    
     public async Task<List<RedisKeyInfo>> GetKeysAsync(string pattern = "*", int maxKeys = 1000)
     {
         if (_connection == null || _database == null)
